@@ -15,7 +15,9 @@ class Song
 
     DB[:conn].execute(sql)
   end
-
+  def self.new_from_db(row)
+    self.new(id:row[0], name:row[1], album:row[2])
+  end
   def self.create_table
     sql = <<-SQL
       CREATE TABLE IF NOT EXISTS songs (
@@ -27,6 +29,24 @@ class Song
 
     DB[:conn].execute(sql)
   end
+  def self.all
+      sql = <<-SQL
+        SELECT *
+        FROM songs
+      SQL
+
+      DB[:conn].execute(sql).map do |row|
+      self.new_from_db(row)
+      end
+    end
+   def self.find_by_name(name)
+   sql = <<-SQL
+   SELECT * FROM songs WHERE songs.name = ? LIMIT 1
+   SQL
+   DB[:conn].execute(sql, name).map do|song|
+   self.new_from_db(song)
+   end.first
+   end
 
   def save
     sql = <<-SQL
